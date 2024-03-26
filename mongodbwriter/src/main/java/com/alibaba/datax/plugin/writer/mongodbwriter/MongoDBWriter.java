@@ -16,6 +16,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.ReplaceOneModel;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -112,7 +113,8 @@ public class MongoDBWriter extends Writer{
 //              and  { "pv" : { "$gt" : 200 , "$lt" : 3000} , "pid" : { "$ne" : "xxx"}}
 //              or  { "$or" : [ { "age" : { "$gt" : 27}} , { "age" : { "$lt" : 15}}]}
                 } else {
-                    query = (BasicDBObject) com.mongodb.util.JSON.parse(json);
+                    //query = (BasicDBObject) com.mongodb.util.JSON.parse(json);
+                    query = BasicDBObject.parse(json);
                 }
                 col.deleteMany(query);
             }
@@ -228,7 +230,8 @@ public class MongoDBWriter extends Writer{
                                 }
                             } else if(type.toLowerCase().equalsIgnoreCase("json")) {
                                 //如果是json类型,将其进行转换
-                                Object mode = com.mongodb.util.JSON.parse(record.getColumn(i).asString());
+                                //Object mode = com.mongodb.util.JSON.parse(record.getColumn(i).asString());
+                                Object mode = JSON.parse(record.getColumn(i).asString());
                                 data.put(columnMeta.getJSONObject(i).getString(KeyConstant.COLUMN_NAME),JSON.toJSON(mode));
                             } else {
                                 data.put(columnMeta.getJSONObject(i).getString(KeyConstant.COLUMN_NAME), record.getColumn(i).asString());
@@ -300,7 +303,8 @@ public class MongoDBWriter extends Writer{
                         if(uniqueKey != null) {
                             query.put(uniqueKey,data.get(uniqueKey));
                         }
-                        ReplaceOneModel<BasicDBObject> replaceOneModel = new ReplaceOneModel<BasicDBObject>(query, data, new UpdateOptions().upsert(true));
+                        //ReplaceOneModel<BasicDBObject> replaceOneModel = new ReplaceOneModel<BasicDBObject>(query, data, new UpdateOptions().upsert(true));
+                        ReplaceOneModel<BasicDBObject> replaceOneModel = new ReplaceOneModel<BasicDBObject>(query, data, new ReplaceOptions().upsert(true));
                         replaceOneModelList.add(replaceOneModel);
                     }
                     collection.bulkWrite(replaceOneModelList, new BulkWriteOptions().ordered(false));
